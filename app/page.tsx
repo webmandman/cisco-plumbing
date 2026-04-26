@@ -1436,63 +1436,6 @@ function FAQ() {
   )
 }
 
-type FieldProps = {
-  label: string
-  name: string
-  placeholder?: string
-  type?: string
-  multiline?: boolean
-}
-function Field({ label, name, placeholder, type = 'text', multiline }: FieldProps) {
-  const baseStyle: React.CSSProperties = {
-    background: 'rgba(0,0,0,0.4)',
-    border: '1px solid rgba(192,192,196,0.18)',
-    borderRadius: 10,
-    padding: '12px 14px',
-    color: T.text,
-    fontFamily: T.body,
-    fontSize: 14,
-    outline: 'none',
-    resize: 'none',
-    width: '100%',
-    boxSizing: 'border-box',
-  }
-  return (
-    <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <span
-        style={{
-          fontFamily: T.body,
-          fontSize: 10,
-          letterSpacing: '0.2em',
-          color: T.goldFlat,
-          textTransform: 'uppercase',
-        }}
-      >
-        {label}
-      </span>
-      {multiline ? (
-        <textarea
-          name={name}
-          placeholder={placeholder}
-          rows={4}
-          style={baseStyle}
-          onFocus={(e) => (e.currentTarget.style.borderColor = T.goldFlat)}
-          onBlur={(e) => (e.currentTarget.style.borderColor = 'rgba(192,192,196,0.18)')}
-        />
-      ) : (
-        <input
-          name={name}
-          type={type}
-          placeholder={placeholder}
-          style={baseStyle}
-          onFocus={(e) => (e.currentTarget.style.borderColor = T.goldFlat)}
-          onBlur={(e) => (e.currentTarget.style.borderColor = 'rgba(192,192,196,0.18)')}
-        />
-      )}
-    </label>
-  )
-}
-
 function ContactRow({
   icon,
   label,
@@ -1570,96 +1513,34 @@ function ContactRow({
 }
 
 function Contact() {
-  const [sent, setSent] = React.useState(false)
   return (
     <section
       style={{ padding: `clamp(40px, 6vw, 72px) ${SECTION_PAD_X} clamp(24px, 4vw, 40px)` }}
       data-section="contact"
       id="contact"
     >
-      <div className="cp-wide">
+      <div className="cp-narrow">
         <SectionHead
           eyebrow="Get In Touch"
           titleSilver="Let's Get"
           titleGold="It Fixed"
-          sub="Tell Cisco what's going on. We'll be in touch with a real ETA — usually within minutes."
+          sub="Call or email any time — we answer 24/7. Quotes are flat-rate and given before any work starts."
         />
-        <div className="cp-contact-layout">
-          <div
-            style={{
-              padding: 18,
-              borderRadius: 18,
-              background: T.card,
-              border: '1px solid ' + T.line,
-            }}
-          >
-            {sent ? (
-              <div style={{ padding: '24px 8px', textAlign: 'center' }}>
-                <div
-                  style={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: '50%',
-                    margin: '0 auto 14px',
-                    background: T.gold,
-                    display: 'grid',
-                    placeItems: 'center',
-                  }}
-                >
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a1407" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12l4 4 10-10" />
-                  </svg>
-                </div>
-                <div style={{ fontFamily: T.display, fontSize: 20, color: T.text, fontWeight: 600 }}>Message Sent</div>
-                <div style={{ marginTop: 6, fontFamily: T.body, fontSize: 13, color: T.muted }}>
-                  Cisco will text you back shortly. Got an emergency? Call now.
-                </div>
-                <div style={{ marginTop: 16 }}>
-                  <GoldButton href={PHONE_HREF}>Call {PHONE}</GoldButton>
-                </div>
-              </div>
-            ) : (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  setSent(true)
-                }}
-                style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
-              >
-                <Field label="Your Name" name="name" placeholder="Jane Smith" />
-                <Field label="Phone" name="phone" placeholder="(714) 555-0100" type="tel" />
-                <Field label="Address (optional)" name="address" placeholder="Anaheim, CA" />
-                <Field label="What's going on?" name="msg" multiline placeholder="Leaking under the sink. Started this morning…" />
-                <button
-                  type="submit"
-                  style={{
-                    marginTop: 6,
-                    padding: '14px',
-                    borderRadius: 999,
-                    border: 'none',
-                    cursor: 'pointer',
-                    background: T.gold,
-                    color: '#1a1407',
-                    fontFamily: T.body,
-                    fontWeight: 700,
-                    fontSize: 14,
-                    letterSpacing: '0.05em',
-                    textTransform: 'uppercase',
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55), 0 8px 22px rgba(212,175,55,0.22)',
-                  }}
-                >
-                  Request a Callback
-                </button>
-              </form>
-            )}
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <ContactRow icon={I.phone} label="Phone" value={PHONE} href={PHONE_HREF} />
-            <ContactRow icon={I.mail} label="Email" value={EMAIL} href={`mailto:${EMAIL}`} />
-            <ContactRow icon={I.clock} label="Hours" value="Open 24 Hours · 7 Days" />
-            <ContactRow icon={I.pin} label="Service Area" value="Orange County, CA" />
-          </div>
+        <div style={{ marginTop: 22, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <ContactRow icon={I.phone} label="Phone" value={PHONE} href={PHONE_HREF} />
+          <ContactRow icon={I.mail} label="Email" value={EMAIL} href={`mailto:${EMAIL}`} />
+          <ContactRow icon={I.clock} label="Hours" value="Open 24 Hours · 7 Days" />
+          <ContactRow icon={I.pin} label="Service Area" value="Orange County, CA" />
+        </div>
+        <div style={{ marginTop: 18, display: 'flex', justifyContent: 'center' }}>
+          <GoldButton href={PHONE_HREF}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#1a1407">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2A19.86 19.86 0 012.06 4.18 2 2 0 014.05 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z" />
+              </svg>
+              Call {PHONE}
+            </span>
+          </GoldButton>
         </div>
       </div>
     </section>

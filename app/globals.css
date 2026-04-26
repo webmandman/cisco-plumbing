@@ -119,20 +119,6 @@ input::placeholder, textarea::placeholder { color: #5a5a60; }
   .cp-grid-whyus { grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
 }
 
-.cp-contact-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  margin-top: 22px;
-}
-@media (min-width: 900px) {
-  .cp-contact-layout {
-    grid-template-columns: 1.2fr 1fr;
-    gap: 22px;
-    align-items: start;
-  }
-}
-
 /* ─── Sticky call: hide on desktop (header has Call CTA) ─ */
 @media (min-width: 768px) {
   .cp-sticky-call { display: none !important; }
