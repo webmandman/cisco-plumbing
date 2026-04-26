@@ -552,9 +552,6 @@ function Hero() {
               Call {PHONE}
             </span>
           </GoldButton>
-          <GoldButton variant="silver" full href="#contact">
-            Free Estimate →
-          </GoldButton>
         </div>
 
         <div
@@ -562,7 +559,7 @@ function Hero() {
           style={{
             marginTop: 14,
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr 1fr',
+            gridTemplateColumns: '1fr 1fr',
             gap: 0,
             padding: '14px 8px',
             borderRadius: 16,
@@ -573,13 +570,12 @@ function Hero() {
           {([
             ['25+', 'YEARS'],
             ['24/7', 'EMERGENCY'],
-            ['5.0', 'GOOGLE'],
           ] as const).map(([n, l], i) => (
             <div
               key={l}
               style={{
                 textAlign: 'center',
-                borderRight: i < 2 ? '1px solid rgba(212,175,55,0.14)' : 'none',
+                borderRight: i < 1 ? '1px solid rgba(212,175,55,0.14)' : 'none',
               }}
             >
               <GoldText family={T.display} size="clamp(22px, 3vw, 30px)" weight={700}>
@@ -1253,21 +1249,6 @@ function Reviews() {
           </div>
         </div>
 
-        <div
-          style={{
-            marginTop: 14,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 10,
-            fontFamily: T.body,
-            fontSize: 11,
-            color: T.muted,
-          }}
-        >
-          <span style={{ width: 18, height: 18 }}>{I.google}</span>
-          <span>5.0 average · 120+ reviews</span>
-        </div>
       </div>
     </section>
   )
