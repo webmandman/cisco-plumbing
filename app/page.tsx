@@ -22,6 +22,12 @@ const T = {
   body: 'var(--font-inter), "Inter", -apple-system, system-ui, sans-serif',
 } as const
 
+// Fluid scaling helpers — sizes interpolate from mobile minimum to desktop max.
+const HERO_TITLE = 'clamp(40px, 9vw, 76px)'
+const SECTION_TITLE = 'clamp(28px, 5vw, 44px)'
+const HERO_LOGO = 'clamp(132px, 18vw, 188px)'
+const SECTION_PAD_X = 'clamp(18px, 3.5vw, 40px)'
+
 type IconProps = {
   d: React.ReactNode
   size?: number
@@ -151,7 +157,7 @@ const I = {
 
 type TextProps = {
   children: React.ReactNode
-  size: number
+  size: number | string
   weight?: number
   family?: string
   style?: React.CSSProperties
@@ -226,8 +232,9 @@ type GoldButtonProps = {
   onClick?: () => void
   full?: boolean
   variant?: 'gold' | 'silver'
+  compact?: boolean
 }
-function GoldButton({ children, href, onClick, full = false, variant = 'gold' }: GoldButtonProps) {
+function GoldButton({ children, href, onClick, full = false, variant = 'gold', compact = false }: GoldButtonProps) {
   const isGold = variant === 'gold'
   const baseStyle: React.CSSProperties = {
     display: 'inline-flex',
@@ -235,12 +242,12 @@ function GoldButton({ children, href, onClick, full = false, variant = 'gold' }:
     justifyContent: 'center',
     gap: 8,
     width: full ? '100%' : undefined,
-    padding: '14px 22px',
+    padding: compact ? '9px 16px' : '14px 22px',
     borderRadius: 999,
     border: 'none',
     cursor: 'pointer',
     fontFamily: T.body,
-    fontSize: 14,
+    fontSize: compact ? 12 : 14,
     fontWeight: 700,
     letterSpacing: '0.04em',
     textTransform: 'uppercase',
@@ -289,33 +296,34 @@ function Divider() {
   )
 }
 
+const NAV_LINKS: [string, string][] = [
+  ['Services', 'services'],
+  ['About', 'about'],
+  ['Service Area', 'area'],
+  ['FAQ', 'faq'],
+  ['Contact', 'contact'],
+]
+
 type HeaderProps = {
   onNav: (key: string) => void
   menuOpen: boolean
   setMenuOpen: (v: boolean) => void
 }
 function Header({ onNav, menuOpen, setMenuOpen }: HeaderProps) {
-  const links: [string, string][] = [
-    ['Services', 'services'],
-    ['About', 'about'],
-    ['Service Area', 'area'],
-    ['FAQ', 'faq'],
-    ['Contact', 'contact'],
-  ]
   return (
     <div
       style={{
         position: 'sticky',
         top: 0,
         zIndex: 40,
-        padding: '18px 18px 12px',
+        padding: `18px ${SECTION_PAD_X} 12px`,
         background:
           'linear-gradient(180deg, rgba(10,10,11,0.98) 0%, rgba(10,10,11,0.92) 80%, rgba(10,10,11,0) 100%)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Image
             src="/logo.png"
@@ -343,37 +351,66 @@ function Header({ onNav, menuOpen, setMenuOpen }: HeaderProps) {
             </span>
           </div>
         </div>
+
+        {/* Desktop nav */}
+        <nav className="cp-desktop-only cp-nav-desktop" aria-label="Primary">
+          {NAV_LINKS.map(([l, k]) => (
+            <button
+              key={k}
+              type="button"
+              className="cp-navlink"
+              onClick={() => onNav(k)}
+            >
+              {l}
+            </button>
+          ))}
+          <GoldButton href={PHONE_HREF} compact>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="#1a1407">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2A19.86 19.86 0 012.06 4.18 2 2 0 014.05 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z" />
+              </svg>
+              {PHONE}
+            </span>
+          </GoldButton>
+        </nav>
+
+        {/* Mobile hamburger */}
         <button
           type="button"
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={menuOpen}
           onClick={() => setMenuOpen(!menuOpen)}
+          className="cp-mobile-only"
           style={{
             width: 40,
             height: 40,
             borderRadius: 12,
             background: 'rgba(255,255,255,0.04)',
             border: '1px solid rgba(212,175,55,0.18)',
-            display: 'grid',
             placeItems: 'center',
+            justifyContent: 'center',
+            alignItems: 'center',
             cursor: 'pointer',
           }}
         >
           {menuOpen ? I.x : I.menu}
         </button>
       </div>
+
+      {/* Mobile dropdown menu */}
       {menuOpen && (
         <div
+          className="cp-mobile-only"
           style={{
             marginTop: 12,
             padding: 10,
             borderRadius: 14,
             background: T.card,
             border: '1px solid ' + T.line,
-            display: 'flex',
             flexDirection: 'column',
           }}
         >
-          {links.map(([l, k]) => (
+          {NAV_LINKS.map(([l, k]) => (
             <button
               key={k}
               type="button"
@@ -423,7 +460,7 @@ function Header({ onNav, menuOpen, setMenuOpen }: HeaderProps) {
 
 function Hero() {
   return (
-    <section style={{ padding: '8px 22px 36px', position: 'relative' }}>
+    <section style={{ padding: `clamp(8px, 2vw, 24px) ${SECTION_PAD_X} clamp(36px, 6vw, 72px)`, position: 'relative' }}>
       <div
         aria-hidden
         style={{
@@ -431,8 +468,8 @@ function Hero() {
           top: -40,
           left: '50%',
           transform: 'translateX(-50%)',
-          width: 360,
-          height: 360,
+          width: 'min(560px, 90%)',
+          height: 'min(560px, 90vw)',
           borderRadius: '50%',
           background: 'radial-gradient(circle, rgba(212,175,55,0.18) 0%, rgba(212,175,55,0) 65%)',
           pointerEvents: 'none',
@@ -440,6 +477,7 @@ function Hero() {
         }}
       />
       <div
+        className="cp-narrow"
         style={{
           position: 'relative',
           display: 'flex',
@@ -453,8 +491,8 @@ function Hero() {
 
         <div
           style={{
-            width: 132,
-            height: 132,
+            width: HERO_LOGO,
+            height: HERO_LOGO,
             borderRadius: 28,
             padding: 4,
             background: T.gold,
@@ -472,24 +510,40 @@ function Hero() {
               overflow: 'hidden',
             }}
           >
-            <Image src="/logo.png" alt="Cisco Plumbing" width={120} height={120} priority style={{ borderRadius: 22 }} />
+            <Image
+              src="/logo.png"
+              alt="Cisco Plumbing"
+              width={180}
+              height={180}
+              priority
+              style={{ width: '90%', height: '90%', borderRadius: 22, objectFit: 'contain' }}
+            />
           </div>
         </div>
 
         <h1 style={{ margin: 0, lineHeight: 0.95 }}>
-          <SilverText size={44}>Plumbing</SilverText>
+          <SilverText size={HERO_TITLE}>Plumbing</SilverText>
           <br />
-          <GoldText size={44} style={{ fontStyle: 'italic' }}>
+          <GoldText size={HERO_TITLE} style={{ fontStyle: 'italic' }}>
             done right.
           </GoldText>
         </h1>
 
-        <p style={{ margin: 0, maxWidth: 320, fontFamily: T.body, fontSize: 14.5, lineHeight: 1.55, color: T.muted }}>
+        <p
+          style={{
+            margin: 0,
+            maxWidth: 520,
+            fontFamily: T.body,
+            fontSize: 'clamp(14.5px, 1.6vw, 17px)',
+            lineHeight: 1.6,
+            color: T.muted,
+          }}
+        >
           Honest pricing. Master craftsmanship. No pushy sales. A trusted local plumber for homes and businesses across
           the valley.
         </p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', marginTop: 6 }}>
+        <div className="cp-hero-actions">
           <GoldButton href={PHONE_HREF} full>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="#1a1407">
@@ -504,9 +558,9 @@ function Hero() {
         </div>
 
         <div
+          className="cp-hero-trust"
           style={{
             marginTop: 14,
-            width: '100%',
             display: 'grid',
             gridTemplateColumns: '1fr 1fr 1fr',
             gap: 0,
@@ -528,7 +582,7 @@ function Hero() {
                 borderRight: i < 2 ? '1px solid rgba(212,175,55,0.14)' : 'none',
               }}
             >
-              <GoldText family={T.display} size={22} weight={700}>
+              <GoldText family={T.display} size="clamp(22px, 3vw, 30px)" weight={700}>
                 {n}
               </GoldText>
               <div style={{ fontFamily: T.body, fontSize: 9.5, letterSpacing: '0.22em', color: T.muted, marginTop: 4 }}>
@@ -544,50 +598,53 @@ function Hero() {
 
 function LicenseBar() {
   return (
-    <div
-      style={{
-        margin: '0 18px',
-        padding: '14px 16px',
-        borderRadius: 14,
-        background: T.card,
-        border: '1px solid ' + T.line,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 14,
-      }}
-    >
+    <div style={{ padding: `0 ${SECTION_PAD_X}` }}>
       <div
+        className="cp-narrow"
         style={{
-          width: 44,
-          height: 44,
-          borderRadius: '50%',
-          background: T.gold,
-          display: 'grid',
-          placeItems: 'center',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6)',
+          padding: '14px 16px',
+          borderRadius: 14,
+          background: T.card,
+          border: '1px solid ' + T.line,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
         }}
       >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a1407" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" />
-          <path d="M9 12l2 2 4-4" />
-        </svg>
-      </div>
-      <div style={{ flex: 1 }}>
         <div
           style={{
-            fontFamily: T.body,
-            fontSize: 9.5,
-            letterSpacing: '0.22em',
-            color: T.goldFlat,
-            textTransform: 'uppercase',
+            width: 44,
+            height: 44,
+            borderRadius: '50%',
+            background: T.gold,
+            display: 'grid',
+            placeItems: 'center',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6)',
+            flexShrink: 0,
           }}
         >
-          Certified · Licensed · Insured
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a1407" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" />
+            <path d="M9 12l2 2 4-4" />
+          </svg>
         </div>
-        <div style={{ fontFamily: T.display, fontSize: 16, color: T.text, marginTop: 2, fontWeight: 600 }}>
-          Francisco &ldquo;Cisco&rdquo; Vega
+        <div style={{ flex: 1 }}>
+          <div
+            style={{
+              fontFamily: T.body,
+              fontSize: 9.5,
+              letterSpacing: '0.22em',
+              color: T.goldFlat,
+              textTransform: 'uppercase',
+            }}
+          >
+            Certified · Licensed · Insured
+          </div>
+          <div style={{ fontFamily: T.display, fontSize: 16, color: T.text, marginTop: 2, fontWeight: 600 }}>
+            Francisco &ldquo;Cisco&rdquo; Vega
+          </div>
+          <div style={{ fontFamily: T.body, fontSize: 11, color: T.muted, marginTop: 1 }}>License #1198432</div>
         </div>
-        <div style={{ fontFamily: T.body, fontSize: 11, color: T.muted, marginTop: 1 }}>License #1198432</div>
       </div>
     </div>
   )
@@ -600,62 +657,67 @@ function Offers() {
     { tag: 'SENIORS & VETS', amt: '10%', label: 'Off All Service Calls', code: 'CISCOTHX' },
   ]
   return (
-    <section style={{ padding: '36px 18px 12px' }} data-section="offers">
-      <SectionHead eyebrow="This Month" titleSilver="Special" titleGold="Offers" />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 22 }}>
-        {offers.map((o) => (
-          <div
-            key={o.code}
-            style={{
-              position: 'relative',
-              overflow: 'hidden',
-              padding: '16px 16px 16px 18px',
-              borderRadius: 16,
-              background: T.card,
-              border: '1px solid ' + T.line,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 14,
-            }}
-          >
-            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: T.gold }} />
+    <section
+      style={{ padding: `clamp(36px, 6vw, 72px) ${SECTION_PAD_X} 12px` }}
+      data-section="offers"
+    >
+      <div className="cp-wide">
+        <SectionHead eyebrow="This Month" titleSilver="Special" titleGold="Offers" />
+        <div className="cp-grid-services" style={{ marginTop: 22 }}>
+          {offers.map((o) => (
             <div
+              key={o.code}
               style={{
-                minWidth: 78,
-                height: 78,
-                borderRadius: 12,
-                background: 'radial-gradient(circle at 30% 20%, rgba(212,175,55,0.18), transparent 60%)',
-                border: '1px dashed rgba(212,175,55,0.4)',
-                display: 'grid',
-                placeItems: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+                padding: '16px 16px 16px 18px',
+                borderRadius: 16,
+                background: T.card,
+                border: '1px solid ' + T.line,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
               }}
             >
-              <GoldText family={T.display} size={26} weight={700}>
-                {o.amt}
-              </GoldText>
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: T.gold }} />
               <div
                 style={{
-                  fontFamily: T.body,
-                  fontSize: 9.5,
-                  letterSpacing: '0.2em',
-                  color: T.goldFlat,
-                  textTransform: 'uppercase',
+                  minWidth: 78,
+                  height: 78,
+                  borderRadius: 12,
+                  background: 'radial-gradient(circle at 30% 20%, rgba(212,175,55,0.18), transparent 60%)',
+                  border: '1px dashed rgba(212,175,55,0.4)',
+                  display: 'grid',
+                  placeItems: 'center',
                 }}
               >
-                {o.tag}
+                <GoldText family={T.display} size={26} weight={700}>
+                  {o.amt}
+                </GoldText>
               </div>
-              <div style={{ fontFamily: T.display, fontSize: 15, color: T.text, marginTop: 4, lineHeight: 1.25 }}>
-                {o.label}
-              </div>
-              <div style={{ marginTop: 6, fontFamily: T.body, fontSize: 11, color: T.muted }}>
-                Mention code{' '}
-                <span style={{ color: T.silverFlat, letterSpacing: '0.05em', fontWeight: 600 }}>{o.code}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  style={{
+                    fontFamily: T.body,
+                    fontSize: 9.5,
+                    letterSpacing: '0.2em',
+                    color: T.goldFlat,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {o.tag}
+                </div>
+                <div style={{ fontFamily: T.display, fontSize: 15, color: T.text, marginTop: 4, lineHeight: 1.25 }}>
+                  {o.label}
+                </div>
+                <div style={{ marginTop: 6, fontFamily: T.body, fontSize: 11, color: T.muted }}>
+                  Mention code{' '}
+                  <span style={{ color: T.silverFlat, letterSpacing: '0.05em', fontWeight: 600 }}>{o.code}</span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   )
@@ -681,13 +743,22 @@ function SectionHead({ eyebrow, titleSilver, titleGold, sub, center = false }: S
     >
       {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
       <h2 style={{ margin: 0, lineHeight: 0.95 }}>
-        <SilverText size={32}>{titleSilver}</SilverText>{' '}
-        <GoldText size={32} style={{ fontStyle: 'italic' }}>
+        <SilverText size={SECTION_TITLE}>{titleSilver}</SilverText>{' '}
+        <GoldText size={SECTION_TITLE} style={{ fontStyle: 'italic' }}>
           {titleGold}
         </GoldText>
       </h2>
       {sub && (
-        <p style={{ margin: 0, fontFamily: T.body, fontSize: 13.5, color: T.muted, lineHeight: 1.55, maxWidth: 320 }}>
+        <p
+          style={{
+            margin: 0,
+            fontFamily: T.body,
+            fontSize: 'clamp(13.5px, 1.5vw, 16px)',
+            color: T.muted,
+            lineHeight: 1.6,
+            maxWidth: 560,
+          }}
+        >
           {sub}
         </p>
       )}
@@ -749,6 +820,8 @@ function ServiceCard({ s, expanded, onToggle }: { s: Service; expanded: boolean;
         background: T.card,
         border: '1px solid ' + T.line,
         overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       <button
@@ -777,6 +850,7 @@ function ServiceCard({ s, expanded, onToggle }: { s: Service; expanded: boolean;
             border: '1px solid rgba(212,175,55,0.28)',
             display: 'grid',
             placeItems: 'center',
+            flexShrink: 0,
           }}
         >
           {s.icon}
@@ -789,9 +863,9 @@ function ServiceCard({ s, expanded, onToggle }: { s: Service; expanded: boolean;
             style={{
               marginTop: 4,
               fontFamily: T.body,
-              fontSize: 12,
+              fontSize: 12.5,
               color: T.muted,
-              lineHeight: 1.45,
+              lineHeight: 1.5,
               display: '-webkit-box',
               WebkitLineClamp: expanded ? 99 : 2,
               WebkitBoxOrient: 'vertical',
@@ -801,7 +875,9 @@ function ServiceCard({ s, expanded, onToggle }: { s: Service; expanded: boolean;
             {s.blurb}
           </div>
         </div>
-        <div style={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform .25s' }}>{I.chev}</div>
+        <div style={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform .25s', flexShrink: 0 }}>
+          {I.chev}
+        </div>
       </button>
       {expanded && (
         <div
@@ -867,17 +943,22 @@ function ServiceCard({ s, expanded, onToggle }: { s: Service; expanded: boolean;
 function Services() {
   const [open, setOpen] = React.useState(0)
   return (
-    <section style={{ padding: '36px 18px 12px' }} data-section="services">
-      <SectionHead
-        eyebrow="What We Do"
-        titleSilver="Full-Service"
-        titleGold="Plumbing"
-        sub="From a leaky faucet at 2am to a whole-home repipe — one trusted plumber, every job."
-      />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 22 }}>
-        {SERVICES.map((s, i) => (
-          <ServiceCard key={s.name} s={s} expanded={open === i} onToggle={() => setOpen(open === i ? -1 : i)} />
-        ))}
+    <section
+      style={{ padding: `clamp(36px, 6vw, 72px) ${SECTION_PAD_X} 12px` }}
+      data-section="services"
+    >
+      <div className="cp-wide">
+        <SectionHead
+          eyebrow="What We Do"
+          titleSilver="Full-Service"
+          titleGold="Plumbing"
+          sub="From a leaky faucet at 2am to a whole-home repipe — one trusted plumber, every job."
+        />
+        <div className="cp-grid-services">
+          {SERVICES.map((s, i) => (
+            <ServiceCard key={s.name} s={s} expanded={open === i} onToggle={() => setOpen(open === i ? -1 : i)} />
+          ))}
+        </div>
       </div>
     </section>
   )
@@ -891,41 +972,43 @@ function WhyUs() {
     { icon: I.check, title: 'Workmanship Guarantee', text: '12-month parts & labor on everything we install.' },
   ]
   return (
-    <section style={{ padding: '40px 18px 12px' }}>
-      <SectionHead eyebrow="The Difference" titleSilver="Why" titleGold="Cisco" />
-      <div style={{ marginTop: 22, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        {items.map((it) => (
-          <div
-            key={it.title}
-            style={{
-              padding: 14,
-              borderRadius: 14,
-              background: T.card,
-              border: '1px solid ' + T.line,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 10,
-            }}
-          >
+    <section style={{ padding: `clamp(40px, 6vw, 72px) ${SECTION_PAD_X} 12px` }}>
+      <div className="cp-wide">
+        <SectionHead eyebrow="The Difference" titleSilver="Why" titleGold="Cisco" />
+        <div className="cp-grid-whyus">
+          {items.map((it) => (
             <div
+              key={it.title}
               style={{
-                width: 38,
-                height: 38,
-                borderRadius: 10,
-                background: 'rgba(212,175,55,0.08)',
-                border: '1px solid rgba(212,175,55,0.25)',
-                display: 'grid',
-                placeItems: 'center',
+                padding: 14,
+                borderRadius: 14,
+                background: T.card,
+                border: '1px solid ' + T.line,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
               }}
             >
-              {it.icon}
+              <div
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: 'rgba(212,175,55,0.08)',
+                  border: '1px solid rgba(212,175,55,0.25)',
+                  display: 'grid',
+                  placeItems: 'center',
+                }}
+              >
+                {it.icon}
+              </div>
+              <div style={{ fontFamily: T.display, fontSize: 15, color: T.text, fontWeight: 600 }}>{it.title}</div>
+              <div style={{ fontFamily: T.body, fontSize: 12, color: T.muted, lineHeight: 1.5, marginTop: -4 }}>
+                {it.text}
+              </div>
             </div>
-            <div style={{ fontFamily: T.display, fontSize: 14, color: T.text, fontWeight: 600 }}>{it.title}</div>
-            <div style={{ fontFamily: T.body, fontSize: 11.5, color: T.muted, lineHeight: 1.45, marginTop: -4 }}>
-              {it.text}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   )
@@ -933,119 +1016,128 @@ function WhyUs() {
 
 function About() {
   return (
-    <section style={{ padding: '40px 18px 12px' }} data-section="about">
-      <SectionHead eyebrow="Meet The Plumber" titleSilver="About" titleGold="Cisco" />
-      <div
-        style={{
-          marginTop: 22,
-          padding: 18,
-          borderRadius: 18,
-          background: 'linear-gradient(180deg, #15151a 0%, #0c0c0f 100%)',
-          border: '1px solid ' + T.line,
-        }}
-      >
+    <section
+      style={{ padding: `clamp(40px, 6vw, 72px) ${SECTION_PAD_X} 12px` }}
+      data-section="about"
+    >
+      <div className="cp-wide">
+        <SectionHead eyebrow="Meet The Plumber" titleSilver="About" titleGold="Cisco" />
         <div
           style={{
-            width: '100%',
-            height: 220,
-            borderRadius: 12,
-            marginBottom: 16,
-            background: 'repeating-linear-gradient(135deg, #1c1c20 0 12px, #16161a 12px 24px)',
-            border: '1px solid rgba(212,175,55,0.2)',
-            display: 'grid',
-            placeItems: 'center',
-            position: 'relative',
-            overflow: 'hidden',
+            marginTop: 22,
+            padding: 18,
+            borderRadius: 18,
+            background: 'linear-gradient(180deg, #15151a 0%, #0c0c0f 100%)',
+            border: '1px solid ' + T.line,
           }}
         >
-          <div
-            style={{
-              fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace',
-              fontSize: 10.5,
-              color: T.goldFlat,
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-              background: 'rgba(10,10,11,0.85)',
-              padding: '6px 10px',
-              borderRadius: 6,
-              border: '1px solid rgba(212,175,55,0.3)',
-            }}
-          >
-            [ portrait — Cisco at the truck ]
-          </div>
-        </div>
-
-        <h3 style={{ margin: 0, fontFamily: T.display, fontSize: 22, color: T.text, fontWeight: 600 }}>
-          Francisco{' '}
-          <span
-            style={{
-              fontStyle: 'italic',
-              background: T.gold,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            &ldquo;Cisco&rdquo;
-          </span>{' '}
-          Vega
-        </h3>
-        <div
-          style={{
-            marginTop: 4,
-            fontFamily: T.body,
-            fontSize: 11,
-            letterSpacing: '0.18em',
-            color: T.goldFlat,
-            textTransform: 'uppercase',
-          }}
-        >
-          Owner · Master Plumber
-        </div>
-
-        <p style={{ marginTop: 14, marginBottom: 0, fontFamily: T.body, fontSize: 13.5, color: T.muted, lineHeight: 1.6 }}>
-          Born and raised right here in the valley, Cisco started swinging a wrench alongside his uncle at sixteen.
-          After two and a half decades — and more slab leaks than he can count — he opened Cisco Plumbing to do things
-          his way: show up on time, charge a fair price, and leave the job cleaner than he found it.
-        </p>
-        <p style={{ marginTop: 12, marginBottom: 0, fontFamily: T.body, fontSize: 13.5, color: T.muted, lineHeight: 1.6 }}>
-          No call centers. No pushy upsells. When you call Cisco Plumbing, you get Cisco — or someone he personally
-          trained.
-        </p>
-
-        <Divider />
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          {([
-            ['25+', 'Years in the trade'],
-            ['100%', 'Family owned'],
-          ] as const).map(([n, l]) => (
+          <div className="cp-about-card">
             <div
-              key={l}
+              className="cp-about-portrait"
               style={{
-                padding: 12,
-                borderRadius: 10,
-                textAlign: 'center',
-                background: 'rgba(255,255,255,0.025)',
-                border: '1px solid rgba(212,175,55,0.12)',
+                width: '100%',
+                height: 220,
+                borderRadius: 12,
+                marginBottom: 16,
+                background: 'repeating-linear-gradient(135deg, #1c1c20 0 12px, #16161a 12px 24px)',
+                border: '1px solid rgba(212,175,55,0.2)',
+                display: 'grid',
+                placeItems: 'center',
+                position: 'relative',
+                overflow: 'hidden',
               }}
             >
-              <GoldText family={T.display} size={22} weight={700}>
-                {n}
-              </GoldText>
               <div
                 style={{
-                  fontFamily: T.body,
-                  fontSize: 10,
+                  fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace',
+                  fontSize: 10.5,
+                  color: T.goldFlat,
                   letterSpacing: '0.18em',
-                  color: T.muted,
                   textTransform: 'uppercase',
-                  marginTop: 4,
+                  background: 'rgba(10,10,11,0.85)',
+                  padding: '6px 10px',
+                  borderRadius: 6,
+                  border: '1px solid rgba(212,175,55,0.3)',
                 }}
               >
-                {l}
+                [ portrait — Cisco at the truck ]
               </div>
             </div>
-          ))}
+            <div>
+              <h3 style={{ margin: 0, fontFamily: T.display, fontSize: 'clamp(22px, 3vw, 30px)', color: T.text, fontWeight: 600 }}>
+                Francisco{' '}
+                <span
+                  style={{
+                    fontStyle: 'italic',
+                    background: T.gold,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  &ldquo;Cisco&rdquo;
+                </span>{' '}
+                Vega
+              </h3>
+              <div
+                style={{
+                  marginTop: 4,
+                  fontFamily: T.body,
+                  fontSize: 11,
+                  letterSpacing: '0.18em',
+                  color: T.goldFlat,
+                  textTransform: 'uppercase',
+                }}
+              >
+                Owner · Master Plumber
+              </div>
+
+              <p style={{ marginTop: 14, marginBottom: 0, fontFamily: T.body, fontSize: 'clamp(13.5px, 1.4vw, 15px)', color: T.muted, lineHeight: 1.6 }}>
+                Born and raised right here in the valley, Cisco started swinging a wrench alongside his uncle at sixteen.
+                After two and a half decades — and more slab leaks than he can count — he opened Cisco Plumbing to do
+                things his way: show up on time, charge a fair price, and leave the job cleaner than he found it.
+              </p>
+              <p style={{ marginTop: 12, marginBottom: 0, fontFamily: T.body, fontSize: 'clamp(13.5px, 1.4vw, 15px)', color: T.muted, lineHeight: 1.6 }}>
+                No call centers. No pushy upsells. When you call Cisco Plumbing, you get Cisco — or someone he personally
+                trained.
+              </p>
+
+              <Divider />
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                {([
+                  ['25+', 'Years in the trade'],
+                  ['100%', 'Family owned'],
+                ] as const).map(([n, l]) => (
+                  <div
+                    key={l}
+                    style={{
+                      padding: 12,
+                      borderRadius: 10,
+                      textAlign: 'center',
+                      background: 'rgba(255,255,255,0.025)',
+                      border: '1px solid rgba(212,175,55,0.12)',
+                    }}
+                  >
+                    <GoldText family={T.display} size="clamp(22px, 2.6vw, 28px)" weight={700}>
+                      {n}
+                    </GoldText>
+                    <div
+                      style={{
+                        fontFamily: T.body,
+                        fontSize: 10,
+                        letterSpacing: '0.18em',
+                        color: T.muted,
+                        textTransform: 'uppercase',
+                        marginTop: 4,
+                      }}
+                    >
+                      {l}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -1074,97 +1166,108 @@ function Reviews() {
   ]
   const [i, setI] = React.useState(0)
   return (
-    <section style={{ padding: '40px 18px 12px' }}>
-      <SectionHead eyebrow="Neighbors Talk" titleSilver="What Folks" titleGold="Are Saying" />
-      <div
-        style={{
-          marginTop: 22,
-          padding: '20px 20px 18px',
-          borderRadius: 18,
-          background: T.card,
-          border: '1px solid ' + T.line,
-          position: 'relative',
-        }}
-      >
+    <section style={{ padding: `clamp(40px, 6vw, 72px) ${SECTION_PAD_X} 12px` }}>
+      <div className="cp-narrow">
+        <SectionHead eyebrow="Neighbors Talk" titleSilver="What Folks" titleGold="Are Saying" />
         <div
-          aria-hidden
           style={{
-            position: 'absolute',
-            top: -14,
-            left: 18,
-            fontFamily: T.display,
-            fontSize: 64,
-            lineHeight: 1,
-            color: T.goldFlat,
-            opacity: 0.4,
+            marginTop: 22,
+            padding: '20px 20px 18px',
+            borderRadius: 18,
+            background: T.card,
+            border: '1px solid ' + T.line,
+            position: 'relative',
           }}
         >
-          &ldquo;
-        </div>
-        <div style={{ display: 'flex', gap: 3, marginBottom: 10 }}>
-          {[0, 1, 2, 3, 4].map((k) => (
-            <span key={k} style={{ width: 14, height: 14 }}>
-              {I.star}
-            </span>
-          ))}
-        </div>
-        <p style={{ margin: 0, fontFamily: T.display, fontSize: 16, fontStyle: 'italic', color: T.text, lineHeight: 1.45 }}>
-          {reviews[i].text}
-        </p>
-        <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontFamily: T.body, fontSize: 12.5, color: T.silverFlat, fontWeight: 600 }}>
-              {reviews[i].name}
-            </div>
-            <div
-              style={{
-                fontFamily: T.body,
-                fontSize: 10.5,
-                color: T.muted,
-                letterSpacing: '0.16em',
-                textTransform: 'uppercase',
-                marginTop: 2,
-              }}
-            >
-              {reviews[i].city} · Verified
-            </div>
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              top: -14,
+              left: 18,
+              fontFamily: T.display,
+              fontSize: 64,
+              lineHeight: 1,
+              color: T.goldFlat,
+              opacity: 0.4,
+            }}
+          >
+            &ldquo;
           </div>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {reviews.map((_, k) => (
-              <button
-                key={k}
-                type="button"
-                aria-label={`Show review ${k + 1}`}
-                onClick={() => setI(k)}
-                style={{
-                  width: k === i ? 22 : 8,
-                  height: 8,
-                  borderRadius: 4,
-                  background: k === i ? T.gold : 'rgba(255,255,255,0.15)',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'width .25s',
-                }}
-              />
+          <div style={{ display: 'flex', gap: 3, marginBottom: 10 }}>
+            {[0, 1, 2, 3, 4].map((k) => (
+              <span key={k} style={{ width: 14, height: 14 }}>
+                {I.star}
+              </span>
             ))}
           </div>
+          <p
+            style={{
+              margin: 0,
+              fontFamily: T.display,
+              fontSize: 'clamp(16px, 2vw, 20px)',
+              fontStyle: 'italic',
+              color: T.text,
+              lineHeight: 1.5,
+            }}
+          >
+            {reviews[i].text}
+          </p>
+          <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontFamily: T.body, fontSize: 12.5, color: T.silverFlat, fontWeight: 600 }}>
+                {reviews[i].name}
+              </div>
+              <div
+                style={{
+                  fontFamily: T.body,
+                  fontSize: 10.5,
+                  color: T.muted,
+                  letterSpacing: '0.16em',
+                  textTransform: 'uppercase',
+                  marginTop: 2,
+                }}
+              >
+                {reviews[i].city} · Verified
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {reviews.map((_, k) => (
+                <button
+                  key={k}
+                  type="button"
+                  aria-label={`Show review ${k + 1}`}
+                  onClick={() => setI(k)}
+                  style={{
+                    width: k === i ? 22 : 8,
+                    height: 8,
+                    borderRadius: 4,
+                    background: k === i ? T.gold : 'rgba(255,255,255,0.15)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'width .25s',
+                  }}
+                />
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div
-        style={{
-          marginTop: 14,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 10,
-          fontFamily: T.body,
-          fontSize: 11,
-          color: T.muted,
-        }}
-      >
-        <span style={{ width: 18, height: 18 }}>{I.google}</span>
-        <span>5.0 average · 120+ reviews</span>
+        <div
+          style={{
+            marginTop: 14,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 10,
+            fontFamily: T.body,
+            fontSize: 11,
+            color: T.muted,
+          }}
+        >
+          <span style={{ width: 18, height: 18 }}>{I.google}</span>
+          <span>5.0 average · 120+ reviews</span>
+        </div>
       </div>
     </section>
   )
@@ -1186,53 +1289,58 @@ function ServiceArea() {
     'La Palma',
   ]
   return (
-    <section style={{ padding: '40px 18px 12px' }} data-section="area">
-      <SectionHead
-        eyebrow="Where We Work"
-        titleSilver="Service"
-        titleGold="Area"
-        sub="Family-run, locally based. Free travel within Orange County."
-      />
-      <div
-        style={{
-          marginTop: 22,
-          padding: 16,
-          borderRadius: 16,
-          background: T.card,
-          border: '1px solid ' + T.line,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-          <span style={{ width: 20, height: 20 }}>{I.pin}</span>
-          <div
-            style={{
-              fontFamily: T.body,
-              fontSize: 11,
-              letterSpacing: '0.2em',
-              color: T.goldFlat,
-              textTransform: 'uppercase',
-            }}
-          >
-            Orange County, CA
-          </div>
-        </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {cities.map((c) => (
-            <span
-              key={c}
+    <section
+      style={{ padding: `clamp(40px, 6vw, 72px) ${SECTION_PAD_X} 12px` }}
+      data-section="area"
+    >
+      <div className="cp-narrow">
+        <SectionHead
+          eyebrow="Where We Work"
+          titleSilver="Service"
+          titleGold="Area"
+          sub="Family-run, locally based. Free travel within Orange County."
+        />
+        <div
+          style={{
+            marginTop: 22,
+            padding: 16,
+            borderRadius: 16,
+            background: T.card,
+            border: '1px solid ' + T.line,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+            <span style={{ width: 20, height: 20 }}>{I.pin}</span>
+            <div
               style={{
-                padding: '6px 12px',
-                borderRadius: 999,
-                background: 'rgba(255,255,255,0.025)',
-                border: '1px solid rgba(192,192,196,0.18)',
                 fontFamily: T.body,
-                fontSize: 11.5,
-                color: T.text,
+                fontSize: 11,
+                letterSpacing: '0.2em',
+                color: T.goldFlat,
+                textTransform: 'uppercase',
               }}
             >
-              {c}
-            </span>
-          ))}
+              Orange County, CA
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {cities.map((c) => (
+              <span
+                key={c}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: 999,
+                  background: 'rgba(255,255,255,0.025)',
+                  border: '1px solid rgba(192,192,196,0.18)',
+                  fontFamily: T.body,
+                  fontSize: 11.5,
+                  color: T.text,
+                }}
+              >
+                {c}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -1265,59 +1373,64 @@ const FAQS = [
 function FAQ() {
   const [open, setOpen] = React.useState(0)
   return (
-    <section style={{ padding: '40px 18px 12px' }} data-section="faq">
-      <SectionHead eyebrow="Common Questions" titleSilver="Asked" titleGold="& Answered" />
-      <div style={{ marginTop: 22, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {FAQS.map((f, i) => (
-          <div
-            key={f.q}
-            style={{
-              borderRadius: 12,
-              background: T.card,
-              border: '1px solid ' + T.line,
-              overflow: 'hidden',
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setOpen(open === i ? -1 : i)}
-              aria-expanded={open === i}
+    <section
+      style={{ padding: `clamp(40px, 6vw, 72px) ${SECTION_PAD_X} 12px` }}
+      data-section="faq"
+    >
+      <div className="cp-narrow">
+        <SectionHead eyebrow="Common Questions" titleSilver="Asked" titleGold="& Answered" />
+        <div style={{ marginTop: 22, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {FAQS.map((f, i) => (
+            <div
+              key={f.q}
               style={{
-                width: '100%',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '14px 14px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                textAlign: 'left',
-                fontFamily: T.body,
-                fontSize: 13.5,
-                color: T.text,
-                fontWeight: 500,
+                borderRadius: 12,
+                background: T.card,
+                border: '1px solid ' + T.line,
+                overflow: 'hidden',
               }}
             >
-              <span style={{ flex: 1 }}>{f.q}</span>
-              <span style={{ transform: open === i ? 'rotate(180deg)' : 'none', transition: 'transform .25s' }}>
-                {I.chev}
-              </span>
-            </button>
-            {open === i && (
-              <div
+              <button
+                type="button"
+                onClick={() => setOpen(open === i ? -1 : i)}
+                aria-expanded={open === i}
                 style={{
-                  padding: '0 14px 14px',
+                  width: '100%',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '14px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  textAlign: 'left',
                   fontFamily: T.body,
-                  fontSize: 12.5,
-                  color: T.muted,
-                  lineHeight: 1.6,
+                  fontSize: 14,
+                  color: T.text,
+                  fontWeight: 500,
                 }}
               >
-                {f.a}
-              </div>
-            )}
-          </div>
-        ))}
+                <span style={{ flex: 1 }}>{f.q}</span>
+                <span style={{ transform: open === i ? 'rotate(180deg)' : 'none', transition: 'transform .25s' }}>
+                  {I.chev}
+                </span>
+              </button>
+              {open === i && (
+                <div
+                  style={{
+                    padding: '0 14px 14px',
+                    fontFamily: T.body,
+                    fontSize: 13,
+                    color: T.muted,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {f.a}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   )
@@ -1338,9 +1451,11 @@ function Field({ label, name, placeholder, type = 'text', multiline }: FieldProp
     padding: '12px 14px',
     color: T.text,
     fontFamily: T.body,
-    fontSize: 13.5,
+    fontSize: 14,
     outline: 'none',
     resize: 'none',
+    width: '100%',
+    boxSizing: 'border-box',
   }
   return (
     <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1359,7 +1474,7 @@ function Field({ label, name, placeholder, type = 'text', multiline }: FieldProp
         <textarea
           name={name}
           placeholder={placeholder}
-          rows={3}
+          rows={4}
           style={baseStyle}
           onFocus={(e) => (e.currentTarget.style.borderColor = T.goldFlat)}
           onBlur={(e) => (e.currentTarget.style.borderColor = 'rgba(192,192,196,0.18)')}
@@ -1410,6 +1525,7 @@ function ContactRow({
           border: '1px solid rgba(212,175,55,0.25)',
           display: 'grid',
           placeItems: 'center',
+          flexShrink: 0,
         }}
       >
         {icon}
@@ -1456,88 +1572,95 @@ function ContactRow({
 function Contact() {
   const [sent, setSent] = React.useState(false)
   return (
-    <section style={{ padding: '40px 18px 24px' }} data-section="contact" id="contact">
-      <SectionHead
-        eyebrow="Get In Touch"
-        titleSilver="Let's Get"
-        titleGold="It Fixed"
-        sub="Tell Cisco what's going on. We'll be in touch with a real ETA — usually within minutes."
-      />
-      <div
-        style={{
-          marginTop: 22,
-          padding: 18,
-          borderRadius: 18,
-          background: T.card,
-          border: '1px solid ' + T.line,
-        }}
-      >
-        {sent ? (
-          <div style={{ padding: '24px 8px', textAlign: 'center' }}>
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: '50%',
-                margin: '0 auto 14px',
-                background: T.gold,
-                display: 'grid',
-                placeItems: 'center',
-              }}
-            >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a1407" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12l4 4 10-10" />
-              </svg>
-            </div>
-            <div style={{ fontFamily: T.display, fontSize: 20, color: T.text, fontWeight: 600 }}>Message Sent</div>
-            <div style={{ marginTop: 6, fontFamily: T.body, fontSize: 13, color: T.muted }}>
-              Cisco will text you back shortly. Got an emergency? Call now.
-            </div>
-            <div style={{ marginTop: 16 }}>
-              <GoldButton href={PHONE_HREF}>Call {PHONE}</GoldButton>
-            </div>
-          </div>
-        ) : (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              setSent(true)
+    <section
+      style={{ padding: `clamp(40px, 6vw, 72px) ${SECTION_PAD_X} clamp(24px, 4vw, 40px)` }}
+      data-section="contact"
+      id="contact"
+    >
+      <div className="cp-wide">
+        <SectionHead
+          eyebrow="Get In Touch"
+          titleSilver="Let's Get"
+          titleGold="It Fixed"
+          sub="Tell Cisco what's going on. We'll be in touch with a real ETA — usually within minutes."
+        />
+        <div className="cp-contact-layout">
+          <div
+            style={{
+              padding: 18,
+              borderRadius: 18,
+              background: T.card,
+              border: '1px solid ' + T.line,
             }}
-            style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
           >
-            <Field label="Your Name" name="name" placeholder="Jane Smith" />
-            <Field label="Phone" name="phone" placeholder="(714) 555-0100" type="tel" />
-            <Field label="Address (optional)" name="address" placeholder="Anaheim, CA" />
-            <Field label="What's going on?" name="msg" multiline placeholder="Leaking under the sink. Started this morning…" />
-            <button
-              type="submit"
-              style={{
-                marginTop: 6,
-                padding: '14px',
-                borderRadius: 999,
-                border: 'none',
-                cursor: 'pointer',
-                background: T.gold,
-                color: '#1a1407',
-                fontFamily: T.body,
-                fontWeight: 700,
-                fontSize: 14,
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55), 0 8px 22px rgba(212,175,55,0.22)',
-              }}
-            >
-              Request a Callback
-            </button>
-          </form>
-        )}
-      </div>
+            {sent ? (
+              <div style={{ padding: '24px 8px', textAlign: 'center' }}>
+                <div
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: '50%',
+                    margin: '0 auto 14px',
+                    background: T.gold,
+                    display: 'grid',
+                    placeItems: 'center',
+                  }}
+                >
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a1407" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12l4 4 10-10" />
+                  </svg>
+                </div>
+                <div style={{ fontFamily: T.display, fontSize: 20, color: T.text, fontWeight: 600 }}>Message Sent</div>
+                <div style={{ marginTop: 6, fontFamily: T.body, fontSize: 13, color: T.muted }}>
+                  Cisco will text you back shortly. Got an emergency? Call now.
+                </div>
+                <div style={{ marginTop: 16 }}>
+                  <GoldButton href={PHONE_HREF}>Call {PHONE}</GoldButton>
+                </div>
+              </div>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  setSent(true)
+                }}
+                style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
+              >
+                <Field label="Your Name" name="name" placeholder="Jane Smith" />
+                <Field label="Phone" name="phone" placeholder="(714) 555-0100" type="tel" />
+                <Field label="Address (optional)" name="address" placeholder="Anaheim, CA" />
+                <Field label="What's going on?" name="msg" multiline placeholder="Leaking under the sink. Started this morning…" />
+                <button
+                  type="submit"
+                  style={{
+                    marginTop: 6,
+                    padding: '14px',
+                    borderRadius: 999,
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: T.gold,
+                    color: '#1a1407',
+                    fontFamily: T.body,
+                    fontWeight: 700,
+                    fontSize: 14,
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55), 0 8px 22px rgba(212,175,55,0.22)',
+                  }}
+                >
+                  Request a Callback
+                </button>
+              </form>
+            )}
+          </div>
 
-      <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <ContactRow icon={I.phone} label="Phone" value={PHONE} href={PHONE_HREF} />
-        <ContactRow icon={I.mail} label="Email" value={EMAIL} href={`mailto:${EMAIL}`} />
-        <ContactRow icon={I.clock} label="Hours" value="Open 24 Hours · 7 Days" />
-        <ContactRow icon={I.pin} label="Service Area" value="Orange County, CA" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <ContactRow icon={I.phone} label="Phone" value={PHONE} href={PHONE_HREF} />
+            <ContactRow icon={I.mail} label="Email" value={EMAIL} href={`mailto:${EMAIL}`} />
+            <ContactRow icon={I.clock} label="Hours" value="Open 24 Hours · 7 Days" />
+            <ContactRow icon={I.pin} label="Service Area" value="Orange County, CA" />
+          </div>
+        </div>
       </div>
     </section>
   )
@@ -1547,7 +1670,7 @@ function Footer() {
   return (
     <footer
       style={{
-        padding: '28px 22px 110px',
+        padding: `clamp(28px, 4vw, 56px) ${SECTION_PAD_X} clamp(110px, 12vw, 140px)`,
         textAlign: 'center',
         borderTop: '1px solid ' + T.line,
         background: 'linear-gradient(180deg, transparent, rgba(212,175,55,0.04))',
@@ -1608,6 +1731,7 @@ function Footer() {
 function StickyCall() {
   return (
     <div
+      className="cp-sticky-call"
       style={{
         position: 'fixed',
         left: 14,
@@ -1662,17 +1786,7 @@ export default function Page() {
     }
   }
   return (
-    <main
-      style={{
-        background: T.bg,
-        color: T.text,
-        minHeight: '100vh',
-        margin: '0 auto',
-        maxWidth: 480,
-        position: 'relative',
-        boxShadow: '0 0 0 1px rgba(212,175,55,0.06)',
-      }}
-    >
+    <main className="cp-page">
       <Header onNav={onNav} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
       <Hero />
       <LicenseBar />

@@ -15,3 +15,137 @@ html, body {
 }
 
 input::placeholder, textarea::placeholder { color: #5a5a60; }
+
+/* ─── Page shell ─────────────────────────────────────── */
+.cp-page {
+  position: relative;
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #0a0a0b;
+  color: #ececec;
+  min-height: 100vh;
+}
+@media (min-width: 768px) {
+  .cp-page {
+    box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.05);
+  }
+  body {
+    background: radial-gradient(ellipse at top, #16140d 0%, #0a0a0b 60%);
+  }
+}
+
+/* Section sets its own padding via inline style; this class centers and caps width */
+.cp-narrow { max-width: 720px; margin-left: auto; margin-right: auto; width: 100%; }
+.cp-wide   { max-width: 1024px; margin-left: auto; margin-right: auto; width: 100%; }
+
+/* ─── Visibility helpers ─────────────────────────────── */
+.cp-mobile-only { display: flex; }
+.cp-desktop-only { display: none !important; }
+@media (min-width: 768px) {
+  .cp-mobile-only { display: none !important; }
+  .cp-desktop-only { display: flex !important; }
+}
+
+/* ─── Header desktop nav ─────────────────────────────── */
+.cp-nav-desktop {
+  align-items: center;
+  gap: 22px;
+}
+.cp-nav-desktop a.cp-navlink {
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #ececec;
+  text-decoration: none;
+  padding: 6px 4px;
+  border-bottom: 1px solid transparent;
+  transition: color .15s, border-color .15s;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+}
+.cp-nav-desktop a.cp-navlink:hover,
+.cp-nav-desktop button.cp-navlink:hover {
+  color: #d4af37;
+  border-bottom-color: rgba(212, 175, 55, 0.5);
+}
+
+/* ─── Hero actions ───────────────────────────────────── */
+.cp-hero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 6px;
+  max-width: 380px;
+}
+@media (min-width: 600px) {
+  .cp-hero-actions {
+    flex-direction: row;
+    max-width: 520px;
+    justify-content: center;
+  }
+  .cp-hero-actions > * { flex: 1; }
+}
+
+.cp-hero-trust {
+  width: 100%;
+  max-width: 480px;
+}
+
+/* ─── Responsive grids ───────────────────────────────── */
+.cp-grid-services {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 22px;
+}
+@media (min-width: 720px) {
+  .cp-grid-services { grid-template-columns: 1fr 1fr; gap: 14px; }
+}
+@media (min-width: 1024px) {
+  .cp-grid-services { grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+}
+
+.cp-grid-whyus {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 22px;
+}
+@media (min-width: 768px) {
+  .cp-grid-whyus { grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+}
+
+.cp-contact-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 22px;
+}
+@media (min-width: 900px) {
+  .cp-contact-layout {
+    grid-template-columns: 1.2fr 1fr;
+    gap: 22px;
+    align-items: start;
+  }
+}
+
+/* ─── Sticky call: hide on desktop (header has Call CTA) ─ */
+@media (min-width: 768px) {
+  .cp-sticky-call { display: none !important; }
+}
+
+/* ─── About: side-by-side at desktop ─────────────────── */
+.cp-about-card { display: flex; flex-direction: column; gap: 0; }
+@media (min-width: 768px) {
+  .cp-about-card {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 22px;
+    align-items: start;
+  }
+  .cp-about-card .cp-about-portrait { height: 100%; min-height: 280px; margin-bottom: 0; }
+}
