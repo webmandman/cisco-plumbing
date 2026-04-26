@@ -233,8 +233,9 @@ type GoldButtonProps = {
   full?: boolean
   variant?: 'gold' | 'silver'
   compact?: boolean
+  id?: string
 }
-function GoldButton({ children, href, onClick, full = false, variant = 'gold', compact = false }: GoldButtonProps) {
+function GoldButton({ children, href, onClick, full = false, variant = 'gold', compact = false, id }: GoldButtonProps) {
   const isGold = variant === 'gold'
   const baseStyle: React.CSSProperties = {
     display: 'inline-flex',
@@ -260,13 +261,13 @@ function GoldButton({ children, href, onClick, full = false, variant = 'gold', c
   }
   if (href) {
     return (
-      <a href={href} onClick={onClick} style={baseStyle}>
+      <a id={id} href={href} onClick={onClick} style={baseStyle}>
         {children}
       </a>
     )
   }
   return (
-    <button type="button" onClick={onClick} style={baseStyle}>
+    <button id={id} type="button" onClick={onClick} style={baseStyle}>
       {children}
     </button>
   )
@@ -544,7 +545,7 @@ function Hero() {
         </p>
 
         <div className="cp-hero-actions">
-          <GoldButton href={PHONE_HREF} full>
+          <GoldButton id="hero-call" href={PHONE_HREF} full>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="#1a1407">
                 <path d="M22 16.92v3a2 2 0 01-2.18 2A19.86 19.86 0 012.06 4.18 2 2 0 014.05 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z" />
@@ -1591,9 +1592,21 @@ function Footer() {
 }
 
 function StickyCall() {
+  const [visible, setVisible] = React.useState(false)
+  React.useEffect(() => {
+    const target = document.getElementById('hero-call')
+    if (!target) return
+    const obs = new IntersectionObserver(
+      ([entry]) => setVisible(!entry.isIntersecting),
+      { threshold: 0 },
+    )
+    obs.observe(target)
+    return () => obs.disconnect()
+  }, [])
   return (
     <div
       className="cp-sticky-call"
+      aria-hidden={!visible}
       style={{
         position: 'fixed',
         left: 14,
@@ -1603,12 +1616,16 @@ function StickyCall() {
         pointerEvents: 'none',
         display: 'flex',
         justifyContent: 'center',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(16px)',
+        transition: 'opacity .25s ease, transform .25s ease',
       }}
     >
       <a
         href={PHONE_HREF}
+        tabIndex={visible ? 0 : -1}
         style={{
-          pointerEvents: 'auto',
+          pointerEvents: visible ? 'auto' : 'none',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
