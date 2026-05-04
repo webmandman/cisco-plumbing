@@ -3,10 +3,10 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: #0a0a0b;
+  background: #0b0b0d;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
-  color: #ececec;
+  color: #f4f4f5;
 }
 
 @keyframes cpFade {
@@ -21,16 +21,16 @@ input::placeholder, textarea::placeholder { color: #5a5a60; }
   position: relative;
   max-width: 1180px;
   margin: 0 auto;
-  background: #0a0a0b;
-  color: #ececec;
+  background: #0b0b0d;
+  color: #f4f4f5;
   min-height: 100vh;
 }
 @media (min-width: 768px) {
   .cp-page {
-    box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.05);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
   }
   body {
-    background: radial-gradient(ellipse at top, #16140d 0%, #0a0a0b 60%);
+    background: radial-gradient(ellipse at top, #14120c 0%, #0b0b0d 60%);
   }
 }
 
@@ -49,27 +49,27 @@ input::placeholder, textarea::placeholder { color: #5a5a60; }
 /* ─── Header desktop nav ─────────────────────────────── */
 .cp-nav-desktop {
   align-items: center;
-  gap: 22px;
+  gap: 26px;
 }
+.cp-nav-desktop button.cp-navlink,
 .cp-nav-desktop a.cp-navlink {
   font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.04em;
-  color: #ececec;
+  letter-spacing: -0.005em;
+  color: #f4f4f5;
   text-decoration: none;
-  padding: 6px 4px;
-  border-bottom: 1px solid transparent;
-  transition: color .15s, border-color .15s;
-  background: transparent;
+  padding: 6px 2px;
   border: none;
   border-bottom: 1px solid transparent;
+  background: transparent;
   cursor: pointer;
+  transition: color .15s, border-color .15s;
 }
-.cp-nav-desktop a.cp-navlink:hover,
-.cp-nav-desktop button.cp-navlink:hover {
-  color: #d4af37;
-  border-bottom-color: rgba(212, 175, 55, 0.5);
+.cp-nav-desktop button.cp-navlink:hover,
+.cp-nav-desktop a.cp-navlink:hover {
+  color: #e3b341;
+  border-bottom-color: rgba(227, 179, 65, 0.6);
 }
 
 /* ─── Hero actions ───────────────────────────────────── */
@@ -83,55 +83,51 @@ input::placeholder, textarea::placeholder { color: #5a5a60; }
 }
 @media (min-width: 600px) {
   .cp-hero-actions {
-    flex-direction: row;
-    max-width: 520px;
-    justify-content: center;
+    max-width: 420px;
   }
-  .cp-hero-actions > * { flex: 1; }
-}
-
-.cp-hero-trust {
-  width: 100%;
-  max-width: 480px;
 }
 
 /* ─── Responsive grids ───────────────────────────────── */
-.cp-grid-services {
+.cp-grid-offers {
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
-  margin-top: 22px;
 }
 @media (min-width: 720px) {
-  .cp-grid-services { grid-template-columns: 1fr 1fr; gap: 14px; }
-}
-@media (min-width: 1024px) {
-  .cp-grid-services { grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .cp-grid-offers { grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
 }
 
-.cp-grid-whyus {
+.cp-grid-howitworks {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cp-grid-about-tags {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-top: 22px;
+}
+@media (min-width: 720px) {
+  .cp-grid-about-tags { grid-template-columns: repeat(4, 1fr); }
+}
+
+.cp-about-card {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
 }
 @media (min-width: 768px) {
-  .cp-grid-whyus { grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+  .cp-about-card {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 28px;
+    align-items: start;
+  }
+  .cp-about-card .cp-about-portrait { height: 100%; min-height: 320px; }
 }
 
 /* ─── Sticky call: hide on desktop (header has Call CTA) ─ */
 @media (min-width: 768px) {
   .cp-sticky-call { display: none !important; }
-}
-
-/* ─── About: side-by-side at desktop ─────────────────── */
-.cp-about-card { display: flex; flex-direction: column; gap: 0; }
-@media (min-width: 768px) {
-  .cp-about-card {
-    display: grid;
-    grid-template-columns: 1fr 1.4fr;
-    gap: 22px;
-    align-items: start;
-  }
-  .cp-about-card .cp-about-portrait { height: 100%; min-height: 280px; margin-bottom: 0; }
 }
